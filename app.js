@@ -29,7 +29,7 @@ c.on('job', (job) => {
             await state.update({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
             job.done(error);
         }
-    }, 100);
+    }, 3000);
 });
 
 c.register(setting);
