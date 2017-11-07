@@ -1,0 +1,19 @@
+{
+  "name": "worker-stub",
+  "version": "1.0.0",
+  "description": "pipeline-driver",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "dependencies": {
+    "etcd.rf": "^2.1.14",
+    "producer-consumer.rf": "^1.0.8"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "RAF",
+  "license": "ISC"
+}
