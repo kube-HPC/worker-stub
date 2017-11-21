@@ -8,7 +8,7 @@
     "test": "test"
   },
   "dependencies": {
-    "etcd.rf": "^2.1.14",
+    "etcd.rf": "^2.1.30",
     "producer-consumer.rf": "^1.0.8"
   },
   "scripts": {

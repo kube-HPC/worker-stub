@@ -14,18 +14,7 @@ class StateManager {
     }
 
     async update(options) {
-        await Promise.all([
-            this._updateResult(options),
-            this._updateStatus(options)
-        ]);
-    }
-
-    async _updateResult(options) {
-        await this._etcd.tasks.setResult(options);
-    }
-
-    async _updateStatus(options) {
-        await this._etcd.tasks.setStatus(options);
+        await this._etcd.tasks.setState(options);
     }
 }
 

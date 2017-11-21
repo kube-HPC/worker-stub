@@ -18,13 +18,13 @@ c.on('job', (job) => {
         const rand = random();
         const result = rand;
 
-        if (rand > 0) {
+        if (rand > 5) {
             console.log(`job ${job.id} done with ${JSON.stringify(result)}`);
             await state.update({ jobId: job.data.jobID, taskId: job.id, result: result, status: 'completed' });
             job.done(null, result);
         }
         else {
-            const error = new Error('failed');
+            const error = new Error('some strange error');
             console.log(`job ${job.id} failed with ${JSON.stringify(result)}`);
             await state.update({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
             job.done(error);
