@@ -1,7 +1,7 @@
+const Etcd = require('@hkube/etcd');
+const { Consumer } = require('@hkube/producer-consumer');
 
-const { Consumer } = require('producer-consumer.rf');
-const state = require('./state-manager');
-
+const serviceName = 'worker-stub';
 const setting = {
     job: {
         type: process.env.ALG || 'green-alg'
@@ -10,29 +10,45 @@ const setting = {
         prefix: 'jobs-workers'
     }
 };
-const c = new Consumer(setting);
-c.on('job', (job) => {
-    console.log(`job arrived for ${job.data.node} with input: ${JSON.stringify(job.data.input)}`);
+const etcdOptions = {
+    protocol: 'http',
+    host: process.env.ETCD_SERVICE_HOST || 'localhost',
+    port: process.env.ETCD_SERVICE_PORT || 4001
+};
 
+let currentJob = null;
+const etcd = new Etcd();
+etcd.init({ etcd: etcdOptions, serviceName });
+etcd.jobs.on('change', (res) => {
+    console.log(`job stopped ${currentJob.id}`);
+    currentJob.done(null);
+});
+
+const consumer = new Consumer(setting);
+consumer.on('job', (job) => {
+    console.log(`job arrived for ${job.data.node} with input: ${JSON.stringify(job.data.input)}`);
+    etcd.jobs.watch({ jobId: job.data.jobID });
+
+    currentJob = job;
     setTimeout(async () => {
         const rand = random();
         const result = rand;
 
-        if (rand > 5) {
+        if (rand > 0) {
             console.log(`job ${job.id} done with ${JSON.stringify(result)}`);
-            await state.update({ jobId: job.data.jobID, taskId: job.id, result: result, status: 'completed' });
+            await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, result: result, status: 'completed' });
             job.done(null, result);
         }
         else {
             const error = new Error('some strange error');
             console.log(`job ${job.id} failed with ${JSON.stringify(result)}`);
-            await state.update({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
+            await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
             job.done(error);
         }
-    }, 3000);
+    }, 50000);
 });
 
-c.register(setting);
+consumer.register(setting);
 console.log(`worker ready for algo ${setting.job.type}`);
 
 function random() {

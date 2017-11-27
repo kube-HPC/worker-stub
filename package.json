@@ -8,8 +8,8 @@
     "test": "test"
   },
   "dependencies": {
-    "etcd.rf": "^2.1.30",
-    "producer-consumer.rf": "^1.0.8"
+    "@hkube/etcd": "^2.1.30",
+    "@hkube/producer-consumer": "^1.0.8"
   },
   "scripts": {
     "test": "mocha"
