@@ -20,7 +20,7 @@ let currentJob = null;
 const etcd = new Etcd();
 etcd.init({ etcd: etcdOptions, serviceName });
 etcd.jobs.on('change', (res) => {
-    console.log(`job stopped ${currentJob.id}. res: ${JSON.stringify(res)}`);
+    console.log(`job stopped ${currentJob.id}. result: ${JSON.stringify(res)}`);
     currentJob.done(null);
 });
 
