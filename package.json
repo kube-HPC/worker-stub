@@ -8,8 +8,8 @@
     "test": "test"
   },
   "dependencies": {
-    "@hkube/etcd": "^2.1.30",
-    "@hkube/producer-consumer": "^1.0.8"
+    "@hkube/etcd": "^2.1.44",
+    "@hkube/producer-consumer": "^1.0.15"
   },
   "scripts": {
     "test": "mocha"
