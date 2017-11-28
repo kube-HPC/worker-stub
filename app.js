@@ -20,8 +20,9 @@ let currentJob = null;
 const etcd = new Etcd();
 etcd.init({ etcd: etcdOptions, serviceName });
 etcd.jobs.on('change', (res) => {
-    console.log(`job stopped ${currentJob.id}`);
+    console.log(`job stopped ${currentJob.id}. result: ${JSON.stringify(res)}`);
     currentJob.done(null);
+    etcd.jobs.unwatch({ jobId: job.data.jobID })
 });
 
 const consumer = new Consumer(setting);
@@ -38,12 +39,14 @@ consumer.on('job', (job) => {
             console.log(`job ${job.id} done with ${JSON.stringify(result)}`);
             await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, result: result, status: 'completed' });
             job.done(null, result);
+            etcd.jobs.unwatch({ jobId: job.data.jobID })
         }
         else {
             const error = new Error('some strange error');
             console.log(`job ${job.id} failed with ${JSON.stringify(result)}`);
             await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
             job.done(error);
+            etcd.jobs.unwatch({ jobId: job.data.jobID })
         }
     }, 5000);
 });
