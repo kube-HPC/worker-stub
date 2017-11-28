@@ -45,7 +45,7 @@ consumer.on('job', (job) => {
             await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
             job.done(error);
         }
-    }, 50000);
+    }, 5000);
 });
 
 consumer.register(setting);
