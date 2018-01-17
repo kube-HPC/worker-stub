@@ -16,40 +16,77 @@ const etcdOptions = {
     port: process.env.ETCD_SERVICE_PORT || 4001
 };
 
+const useRandomTimeout = false;
+const useFixedTimeout = true;
+const randomBatchFail = false;
+const fixedTimeout = 1000;
+
 let currentJob = null;
 const etcd = new Etcd();
 etcd.init({ etcd: etcdOptions, serviceName });
 etcd.jobs.on('change', (res) => {
     console.log(`job stopped ${currentJob.id}. result: ${JSON.stringify(res)}`);
-    currentJob.done(null);
-    etcd.jobs.unwatch({ jobId: job.data.jobID })
+    etcd.jobs.unwatch({ jobId: job.data.jobID });
+    currentJob.done();
 });
 
 const consumer = new Consumer(setting);
 consumer.on('job', (job) => {
-    console.log(`job arrived for ${job.data.node} with input: ${JSON.stringify(job.data.input)}`);
     etcd.jobs.watch({ jobId: job.data.jobID });
-
     currentJob = job;
-    setTimeout(async () => {
-        const rand = random();
-        const result = rand;
+    console.log(`job arrived for node ${job.data.node} with input: ${JSON.stringify(job.data.input)}`);
+    etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.data.taskID, status: 'active' });
 
-        if (rand > 0) {
-            console.log(`job ${job.id} done with ${JSON.stringify(result)}`);
-            await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, result: result, status: 'completed' });
-            job.done(null, result);
-            etcd.jobs.unwatch({ jobId: job.data.jobID })
+    if (useRandomTimeout || useFixedTimeout) {
+        const timeout = useFixedTimeout ? fixedTimeout : random() * 1000;
+        console.log(`starting timeout of ${timeout / 1000} sec`);
+
+        setTimeout(() => {
+            endJob(job);
+        }, timeout);
+    }
+    else {
+        endJob(job);
+    }
+
+    const e1 = {
+        "nodeName": "black",
+        "batchID": "black#7",
+        "algorithmName": "black-alg",
+        "error": {
+            "code": 33,
+            "message": 'some error',
+            "details": ''
         }
-        else {
-            const error = new Error('some strange error');
-            console.log(`job ${job.id} failed with ${JSON.stringify(result)}`);
-            await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.id, error: error.message, status: 'failed' });
-            job.done(error);
-            etcd.jobs.unwatch({ jobId: job.data.jobID })
-        }
-    }, 5000);
+    }
+
+    const e2 = {
+        "nodeName": "black",
+        "batchID": "black#7",
+        "algorithmName": "black-alg",
+        "result": 42
+    }
 });
+
+async function endJob(job) {
+    const isBatch = job.data.node.indexOf('#') > 0
+    const rand = isBatch && randomBatchFail ? random() : 20;
+    const result = job.data.input[0];
+
+    if (rand > 5) {
+        await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.data.taskID, result: result, status: 'succeed' });
+        await etcd.jobs.unwatch({ jobId: job.data.jobID });
+        job.done();
+        console.log(`job ${job.id} succeed with ${result}`);
+    }
+    else {
+        const error = new Error('some strange error');
+        await etcd.tasks.setState({ jobId: job.data.jobID, taskId: job.data.taskID, error: error.message, status: 'failed' });
+        await etcd.jobs.unwatch({ jobId: job.data.jobID });
+        job.done(error);
+        console.log(`job ${job.id} failed with ${error.message}`);
+    }
+}
 
 consumer.register(setting);
 console.log(`worker ready for algo ${setting.job.type}`);
