@@ -10,12 +10,16 @@
   "dependencies": {
     "@hkube/etcd": "^3.2.35",
     "@hkube/producer-consumer": "^1.0.31",
-    "etcd3": "^0.2.9",
-    "eval": "^0.1.2"
+    "etcd3": "^0.2.10",
+    "eval": "^0.1.2",
+    "snyk": "^1.116.2"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "RAF",
-  "license": "ISC"
+  "license": "ISC",
+  "snyk": true
 }
