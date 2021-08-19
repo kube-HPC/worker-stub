@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@hkube/etcd": "^3.2.35",
-    "@hkube/producer-consumer": "^1.0.31",
+    "@hkube/producer-consumer": "^1.0.36",
     "etcd3": "^0.2.9",
     "eval": "^0.1.2"
   },
