@@ -8,9 +8,9 @@
     "test": "test"
   },
   "dependencies": {
-    "@hkube/etcd": "^3.2.35",
-    "@hkube/producer-consumer": "^1.0.31",
-    "etcd3": "^0.2.9",
+    "@hkube/etcd": "^5.0.32",
+    "@hkube/producer-consumer": "^1.0.41",
+    "etcd3": "^1.0.0",
     "eval": "^0.1.2"
   },
   "scripts": {
