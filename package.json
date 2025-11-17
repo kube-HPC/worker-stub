@@ -8,7 +8,7 @@
     "test": "test"
   },
   "dependencies": {
-    "@hkube/etcd": "^3.2.35",
+    "@hkube/etcd": "^3.2.36",
     "@hkube/producer-consumer": "^1.0.31",
     "etcd3": "^0.2.9",
     "eval": "^0.1.2"
